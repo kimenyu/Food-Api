@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'accounts',
     'djoser',
     'rest_framework_simplejwt',
+    'restaurant',
 ]
 
 MIDDLEWARE = [

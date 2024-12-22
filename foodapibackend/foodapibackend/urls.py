@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),  # Djoser Endpoints
     path('auth/', include('djoser.urls.jwt')),  # JWT Endpoints
+    path('api/v1/restaurant/', include('restaurant.urls')),  # Restaurant Endpoints
 ]
