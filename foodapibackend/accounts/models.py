@@ -21,7 +21,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('customer', 'Customer'),
-        ('restaurant', 'Restaurant'),
+        ('owner', 'Owner'),
         ('delivery_agent', 'Delivery Agent'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -31,7 +31,7 @@ class User(AbstractUser):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    username = None  # Remove the username field
+    username = "username"
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'

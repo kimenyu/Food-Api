@@ -1,44 +1,160 @@
-from django.shortcuts import render
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
-from .serializers import RestaurantSerializer, MenuItemSerializer, OrderSerializer, NotificationSerializer, ReviewSerializer
-from .models import Restaurant, MenuItem, Order, Notification, Review
-from rest_framework.permissions import IsAuthenticated
-from .permissions import IsRestaurantUser
+from rest_framework.generics import (
+    CreateAPIView, ListAPIView, RetrieveAPIView, 
+    UpdateAPIView, DestroyAPIView
+)
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework import status
+from .permissions import IsOwner, IsOwnerOrReadOnly, IsCustomer
+
+from .models import Restaurant, MenuItem, Order, Review, DeliveryAgent
+from .serializers import (
+    RestaurantSerializer, RestaurantCreateSerializer, RestaurantUpdateSerializer,
+    MenuItemSerializer, MenuItemCreateSerializer,
+    OrderSerializer, OrderCreateSerializer,
+    ReviewSerializer, ReviewCreateSerializer
+)
 
 
-class RestaurantCreateAPIView(CreateAPIView):
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer
-    permission_classes = [IsRestaurantUser]
+# Restaurant Views
+class RestaurantCreateView(CreateAPIView):
+    serializer_class = RestaurantCreateSerializer
+    permission_classes = [IsOwner]
 
     def perform_create(self, serializer):
-        # Ensure the user is automatically linked to the restaurant
+        if hasattr(self.request.user, 'owner'):
+            raise PermissionDenied("You already have a restaurant registered")
         serializer.save(user=self.request.user)
-    
-class RestaurantListAPIView(ListAPIView):
-    queryset = Restaurant.objects.all()
+
+class RestaurantListView(ListAPIView):
     serializer_class = RestaurantSerializer
-    
-class RestaurantRetrieveAPIView(RetrieveAPIView):
     queryset = Restaurant.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class RestaurantDetailView(RetrieveAPIView):
     serializer_class = RestaurantSerializer
-    
+    queryset = Restaurant.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class RestaurantUpdateView(UpdateAPIView):
+    serializer_class = RestaurantUpdateSerializer
+    queryset = Restaurant.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        restaurant = self.get_object()
+        if restaurant.user != self.request.user:
+            raise PermissionDenied("You don't have permission to update this restaurant")
+        serializer.save()
+
+class RestaurantDeleteView(DestroyAPIView):
+    queryset = Restaurant.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user:
+            raise PermissionDenied("You don't have permission to delete this restaurant")
+        instance.delete()
+
+# MenuItem Views
+class MenuItemCreateView(CreateAPIView):
+    serializer_class = MenuItemCreateSerializer
+    permission_classes = [IsOwner]
+
+    def perform_create(self, serializer):
+        restaurant = Restaurant.objects.get(user=self.request.user)
+        serializer.save(restaurant=restaurant)
+
+class MenuItemListView(ListAPIView):
+    serializer_class = MenuItemSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_queryset(self):
-        # Restrict restaurants to updating only their data
-        return Restaurant.objects.filter(user=self.request.user)
-    
-class RestaurantUpdateAPIView(UpdateAPIView):
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer
-    
+        return MenuItem.objects.filter(restaurant_id=self.kwargs['restaurant_id'])
+
+class MenuItemUpdateView(UpdateAPIView):
+    serializer_class = MenuItemSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+    queryset = MenuItem.objects.all()
+
+    def perform_update(self, serializer):
+        menu_item = self.get_object()
+        if menu_item.restaurant.user != self.request.user:
+            raise PermissionDenied("You don't have permission to update this menu item")
+        serializer.save()
+
+class MenuItemDeleteView(DestroyAPIView):
+    queryset = MenuItem.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_destroy(self, instance):
+        if instance.restaurant.user != self.request.user:
+            raise PermissionDenied("You don't have permission to delete this menu item")
+        instance.delete()
+
+# Order Views
+class OrderCreateView(CreateAPIView):
+    serializer_class = OrderCreateSerializer
+    permission_classes = [IsCustomer]
+
+    def perform_create(self, serializer):
+        serializer.save(customer=self.request.user)
+
+class OrderListView(ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
-        # Restrict restaurants to updating only their data
-        return Restaurant.objects.filter(user=self.request.user)
-    
-class RestaurantDeleteAPIView(DestroyAPIView):
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer
-    
+        user = self.request.user
+        if user.role == 'customer':
+            return Order.objects.filter(customer=user)
+        elif user.role == 'owner':
+            return Order.objects.filter(restaurant__user=user)
+        elif user.role == 'delivery_agent':
+            return Order.objects.filter(delivery_agent=user)
+        return Order.objects.none()
+
+class OrderDetailView(RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
-        # Restrict restaurants to updating only their data
-        return Restaurant.objects.filter(user=self.request.user)
+        user = self.request.user
+        if user.role == 'customer':
+            return Order.objects.filter(customer=user)
+        elif user.role == 'owner':
+            return Order.objects.filter(restaurant__user=user)
+        elif user.role == 'delivery_agent':
+            return Order.objects.filter(delivery_agent=user)
+        return Order.objects.none()
+
+# Review Views
+class ReviewCreateView(CreateAPIView):
+    serializer_class = ReviewCreateSerializer
+    permission_classes = [IsCustomer]
+
+    def perform_create(self, serializer):
+        restaurant_id = self.kwargs.get('restaurant_id')
+        serializer.save(
+            customer=self.request.user,
+            restaurant_id=restaurant_id
+        )
+
+class ReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Review.objects.filter(restaurant_id=self.kwargs['restaurant_id'])
+
+class RestaurantReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'owner':
+            return Review.objects.filter(restaurant__user=user)
+        return Review.objects.none()
+
