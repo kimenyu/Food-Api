@@ -101,6 +101,17 @@ class OrderCreateView(CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        # Use the default create implementation to save the order
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save(customer=self.request.user)
+
+        # Use OrderSerializer for the response
+        response_serializer = OrderSerializer(order)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+
 class OrderListView(ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
