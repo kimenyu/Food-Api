@@ -11,7 +11,8 @@ class IsOwnerOrReadOnly(IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
             return True
-        return obj.user == request.user and request.user.role == 'owner'
+        # Check if the menu item's restaurant's user matches the request user
+        return obj.restaurant.user == request.user and request.user.role == 'owner'
 
 class IsCustomer(IsAuthenticated):
     def has_permission(self, request, view):

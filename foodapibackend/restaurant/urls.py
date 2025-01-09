@@ -10,8 +10,8 @@ urlpatterns = [
     path('<int:pk>/delete/', RestaurantDeleteView.as_view(), name='restaurant-delete'),
 
     # MenuItem URLs
-    path('restaurants/<int:restaurant_id>/menu-items/', MenuItemListView.as_view(), name='menu-item-list'),
-    path('restaurants/<int:restaurant_id>/menu-items/create/', MenuItemCreateView.as_view(), name='menu-item-create'),
+    path('<int:restaurant_id>/menu-items/', MenuItemListView.as_view(), name='menu-item-list'),
+    path('<int:restaurant_id>/menu-items/create/', MenuItemCreateView.as_view(), name='menu-item-create'),
     path('menu-items/<int:pk>/update/', MenuItemUpdateView.as_view(), name='menu-item-update'),
     path('menu-items/<int:pk>/delete/', MenuItemDeleteView.as_view(), name='menu-item-delete'),
 

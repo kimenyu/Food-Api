@@ -75,21 +75,21 @@ class MenuItemListView(ListAPIView):
 
 class MenuItemUpdateView(UpdateAPIView):
     serializer_class = MenuItemSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]  # Just check if user is authenticated
     queryset = MenuItem.objects.all()
 
     def perform_update(self, serializer):
         menu_item = self.get_object()
-        if menu_item.restaurant.user != self.request.user:
+        if menu_item.restaurant.user != self.request.user or self.request.user.role != 'owner':
             raise PermissionDenied("You don't have permission to update this menu item")
         serializer.save()
 
 class MenuItemDeleteView(DestroyAPIView):
     queryset = MenuItem.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]  # Just check if user is authenticated
 
     def perform_destroy(self, instance):
-        if instance.restaurant.user != self.request.user:
+        if instance.restaurant.user != self.request.user or self.request.user.role != 'owner':
             raise PermissionDenied("You don't have permission to delete this menu item")
         instance.delete()
 
