@@ -3,11 +3,11 @@ from django.urls import path
 
 urlpatterns = [
     # Restaurant URLs
-    path('restaurants/', RestaurantListView.as_view(), name='restaurant-list'),
-    path('restaurants/create/', RestaurantCreateView.as_view(), name='restaurant-create'),
-    path('restaurants/<int:pk>/', RestaurantDetailView.as_view(), name='restaurant-detail'),
-    path('restaurants/<int:pk>/update/', RestaurantUpdateView.as_view(), name='restaurant-update'),
-    path('restaurants/<int:pk>/delete/', RestaurantDeleteView.as_view(), name='restaurant-delete'),
+    path('all/', RestaurantListView.as_view(), name='restaurant-list'),
+    path('create/', RestaurantCreateView.as_view(), name='restaurant-create'),
+    path('<int:pk>/', RestaurantDetailView.as_view(), name='restaurant-detail'),
+    path('<int:pk>/update/', RestaurantUpdateView.as_view(), name='restaurant-update'),
+    path('<int:pk>/delete/', RestaurantDeleteView.as_view(), name='restaurant-delete'),
 
     # MenuItem URLs
     path('restaurants/<int:restaurant_id>/menu-items/', MenuItemListView.as_view(), name='menu-item-list'),

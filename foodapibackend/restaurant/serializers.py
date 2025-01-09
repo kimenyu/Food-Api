@@ -111,10 +111,9 @@ class RestaurantCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         menu_items_data = validated_data.pop('menu_items', [])
-        user = self.context['request'].user
         
-        # Create restaurant
-        restaurant = Restaurant.objects.create(user=user, **validated_data)
+        # Create restaurant (user is passed automatically via serializer.save)
+        restaurant = Restaurant.objects.create(**validated_data)
         
         # Create menu items
         for item_data in menu_items_data:
