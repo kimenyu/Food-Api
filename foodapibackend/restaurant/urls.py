@@ -21,7 +21,7 @@ urlpatterns = [
     path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
 
     # Review URLs
-    path('restaurants/<int:restaurant_id>/reviews/', ReviewListView.as_view(), name='review-list'),
-    path('restaurants/<int:restaurant_id>/reviews/create/', ReviewCreateView.as_view(), name='review-create'),
+    path('<int:restaurant_id>/reviews/', ReviewListView.as_view(), name='review-list'),
+    path('<int:restaurant_id>/reviews/create/', ReviewCreateView.as_view(), name='review-create'),
     path('my-restaurant/reviews/', RestaurantReviewListView.as_view(), name='restaurant-review-list'),
 ]

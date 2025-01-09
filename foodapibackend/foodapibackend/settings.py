@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework_simplejwt',
     'restaurant',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',  # Optional for ReDoc static files
 ]
 
 MIDDLEWARE = [
@@ -121,6 +123,9 @@ REST_FRAMEWORK = {
      'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+     
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 
 
