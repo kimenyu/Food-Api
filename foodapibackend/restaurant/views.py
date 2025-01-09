@@ -134,12 +134,10 @@ class ReviewCreateView(CreateAPIView):
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsCustomer]
 
-    def perform_create(self, serializer):
-        restaurant_id = self.kwargs.get('restaurant_id')
-        serializer.save(
-            customer=self.request.user,
-            restaurant_id=restaurant_id
-        )
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['restaurant_id'] = self.kwargs.get('restaurant_id')
+        return context
 
 class ReviewListView(ListAPIView):
     serializer_class = ReviewSerializer

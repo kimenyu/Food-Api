@@ -20,11 +20,13 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         restaurant_id = self.context['restaurant_id']
         user = self.context['request'].user
+        
         return Review.objects.create(
             customer=user,
             restaurant_id=restaurant_id,
             **validated_data
         )
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(source='customer.email', read_only=True)
