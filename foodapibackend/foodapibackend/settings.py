@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'restaurant',
     'drf_spectacular',
     'drf_spectacular_sidecar',  # Optional for ReDoc static files
+    'delivery',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -176,6 +178,19 @@ DJOSER = {
         'current_user': 'accounts.serializers.UserCreateSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer',
     }
+}
+
+import json
+
+FIREBASE_CONFIG = json.loads(env('FIREBASE_CONFIG'))
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
 
 

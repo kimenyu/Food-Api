@@ -58,8 +58,8 @@ class Review(models.Model):
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class DeliveryAgent(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='delivery_agent')
-    vehicle_details = models.CharField(max_length=255, blank=True, null=True)
-    availability_status = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class DeliveryAgent(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='delivery_agent')
+#     vehicle_details = models.CharField(max_length=255, blank=True, null=True)
+#     availability_status = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(auto_now_add=True)

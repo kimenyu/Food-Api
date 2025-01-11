@@ -30,6 +30,8 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    fcm_token = models.CharField(max_length=255, blank=True, null=True)  # For Firebase notifications
+
 
     username = "username"
     objects = CustomUserManager()
