@@ -61,15 +61,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['restaurant', 'order_items']
 
-    def validate_restaurant(self, value):
-        # Add any restaurant-specific validation (e.g., checking if restaurant is active)
-        return value
-
     def create(self, validated_data):
         order_items_data = validated_data.pop('order_items')
         user = self.context['request'].user
 
-        # Remove 'customer' from validated_data if it exists
         validated_data.pop('customer', None)
 
         # Calculate total price
